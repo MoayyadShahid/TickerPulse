@@ -1,3 +1,4 @@
+// src/data/mockData.ts
 import { Article, NewsSource, SearchSuggestion } from '../types';
 
 // Mock search suggestions
@@ -144,7 +145,11 @@ export const simulateFetchArticles = (ticker: string): Promise<Article[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       // In a real app, we would filter based on ticker
-      resolve(mockArticles);
+      resolve(
+       mockArticles.filter(a =>
+         a.headline.toLowerCase().includes(ticker.toLowerCase())
+       )
+     );
     }, 800);
   });
 };

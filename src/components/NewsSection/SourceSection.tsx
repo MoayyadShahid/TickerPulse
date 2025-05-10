@@ -27,7 +27,7 @@ const getSourceIcon = (source: NewsSource) => {
     case 'Economist':
       return <Globe2 {...iconProps} />;
     default:
-      return null;
+      return <Newspaper {...iconProps} />;
   }
 };
 

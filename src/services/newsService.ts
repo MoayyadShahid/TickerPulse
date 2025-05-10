@@ -1,42 +1,33 @@
-import { supabase } from '../lib/supabase';
-import type { Article, NewsSource } from '../types';
+// src/services/newsService.ts
+import type { Article } from '../types';
+
+const NEWS_API_KEY = import.meta.env.VITE_NEWSAPI_KEY;
 
 export async function fetchNewsArticles(ticker?: string): Promise<Article[]> {
-  try {
-    const query = supabase
-      .from('news_articles')
-      .select(`
-        id,
-        headline,
-        description,
-        url,
-        image_url,
-        published_at,
-        news_sources (
-          name
-        )
-      `)
-      .order('published_at', { ascending: false });
+  if (!ticker) return [];
 
-    if (ticker) {
-      query.eq('stock_symbol', ticker);
+  const query = encodeURIComponent(ticker);
+  const url = `https://newsapi.org/v2/everything?q=${query}&language=en&sortBy=publishedAt&pageSize=40&apiKey=${NEWS_API_KEY}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.status !== 'ok') {
+      throw new Error(data.message || 'Failed to fetch news articles.');
     }
 
-    const { data, error } = await query.limit(50);
-
-    if (error) throw error;
-
-    return data.map(article => ({
-      id: article.id,
-      source: article.news_sources.name as NewsSource,
-      headline: article.headline,
-      description: article.description || '',
-      url: article.url,
-      publishedAt: article.published_at,
-      imageUrl: article.image_url,
+    return data.articles.map((item: any, index: number) => ({
+      id: `newsapi-${index}`,
+      source: item.source.name,
+      headline: item.title,
+      description: item.description || '',
+      url: item.url,
+      publishedAt: item.publishedAt,
+      imageUrl: item.urlToImage || '',
     }));
   } catch (error) {
-    console.error('Error fetching news articles:', error);
-    throw error;
+    console.error('Error fetching from NewsAPI:', error);
+    return [];
   }
 }

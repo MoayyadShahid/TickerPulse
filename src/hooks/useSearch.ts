@@ -1,3 +1,4 @@
+// src/hooks/useSearch.ts
 import { useState, useEffect, useCallback } from 'react';
 import { SearchSuggestion } from '../types';
 import { searchStocks } from '../services/stockService';
