@@ -1,3 +1,4 @@
+// src/components/NewsSection/NewsContainer.tsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Article, NewsSource } from '../../types';
 import SourceSection from './SourceSection';
@@ -10,13 +11,7 @@ interface NewsContainerProps {
 }
 
 const NewsContainer: React.FC<NewsContainerProps> = ({ ticker }) => {
-  const [articlesBySource, setArticlesBySource] = useState<Record<NewsSource, Article[]>>({
-    'CNBC': [],
-    'Bloomberg': [],
-    'Yahoo Finance': [],
-    'WSJ': [],
-    'Economist': [],
-  });
+  const [articlesBySource, setArticlesBySource] = useState<Record<NewsSource, Article[]>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -65,13 +60,7 @@ const NewsContainer: React.FC<NewsContainerProps> = ({ ticker }) => {
 
   const handleRetry = () => {
     setPage(1);
-    setArticlesBySource({
-      'CNBC': [],
-      'Bloomberg': [],
-      'Yahoo Finance': [],
-      'WSJ': [],
-      'Economist': [],
-    });
+    setArticlesBySource({});
     setHasMore(true);
   };
 

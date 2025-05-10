@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/App.tsx
+import { useState } from 'react';
 import Header from './components/Header/Header';
 import NewsContainer from './components/NewsSection/NewsContainer';
 import { ThemeProvider } from './context/ThemeContext';

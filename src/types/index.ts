@@ -1,14 +1,15 @@
-export interface Article {
+// src/types/index.ts
+export type Article = {
   id: string;
-  source: NewsSource;
+  source: string; // Keep it generic for now
   headline: string;
   description: string;
   url: string;
   publishedAt: string;
   imageUrl?: string;
-}
+};
 
-export type NewsSource = 'CNBC' | 'Bloomberg' | 'Yahoo Finance' | 'WSJ' | 'Economist';
+export type NewsSource = string; // Temporarily loosen type for dynamic sources
 
 export interface SearchSuggestion {
   id: string;

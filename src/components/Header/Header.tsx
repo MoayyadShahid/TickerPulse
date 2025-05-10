@@ -1,8 +1,10 @@
+// src/components/Header/Header.tsx
 import React from 'react';
 import { LineChart } from 'lucide-react';
 import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
 import { useSearch } from '../../hooks/useSearch';
+import type { SearchSuggestion } from '../../types';
 
 interface HeaderProps {
   onSearch: (ticker: string | undefined) => void;
@@ -21,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     setShowSuggestions,
   } = useSearch();
 
-  const handleSuggestionSelect = (suggestion: any) => {
+  const handleSuggestionSelect = (suggestion: SearchSuggestion) => {
     handleSelectSuggestion(suggestion);
     onSearch(suggestion.symbol);
   };
