@@ -1,23 +1,6 @@
 // src/services/newsService.ts
 import type { Article } from '../types';
 
-interface NewsApiArticle {
-  source: { id: string | null; name: string };
-  title: string;
-  description?: string | null;
-  url: string;
-  urlToImage?: string | null;
-  publishedAt: string;
-}
-
-interface NewsApiResponse {
-  status: string;
-  totalResults: number;
-  articles: NewsApiArticle[];
-  code?: string;
-  message?: string;
-}
-
 export async function fetchNewsArticles(ticker?: string): Promise<Article[]> {
   if (!ticker) return [];
 
@@ -25,13 +8,10 @@ export async function fetchNewsArticles(ticker?: string): Promise<Article[]> {
 
   try {
     const response = await fetch(url);
-    const data: NewsApiResponse = await response.json();
+    const data = await response.json();
 
-    if (data.status !== 'ok') {
-      throw new Error(data.message || 'Failed to fetch news articles.');
-    }
-
-    return data.articles.map((item, idx) => ({
+    // NewsAPI’s response shape comes straight through, so:
+    return data.articles.map((item: any, idx: number) => ({
       id: `newsapi-${idx}`,
       source: item.source.name,
       headline: item.title,
@@ -40,8 +20,8 @@ export async function fetchNewsArticles(ticker?: string): Promise<Article[]> {
       publishedAt: item.publishedAt,
       imageUrl: item.urlToImage || '',
     }));
-  } catch (error) {
-    console.error('Error fetching news via proxy:', error);
+  } catch (err) {
+    console.error("Error fetching news via proxy:", err);
     return [];
   }
 }
