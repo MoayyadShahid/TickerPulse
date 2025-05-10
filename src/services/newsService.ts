@@ -1,47 +1,46 @@
 // src/services/newsService.ts
 import type { Article } from '../types';
 
-interface ProxyNewsArticle {
-  source: { id: string | null; name: string };
-  title: string;
-  description?: string | null;
-  url: string;
-  urlToImage?: string | null;
-  publishedAt: string;
-}
+const FINNHUB_KEY = import.meta.env.VITE_FINNHUB_KEY;
 
-interface ProxyNewsResponse {
-  status: string;
-  totalResults: number;
-  articles: ProxyNewsArticle[];
-  code?: string;
-  message?: string;
-}
-
+// Fetches the last 7 days of company news from Finnhub
 export async function fetchNewsArticles(ticker?: string): Promise<Article[]> {
   if (!ticker) return [];
 
-  const url = `/api/news?ticker=${encodeURIComponent(ticker)}`;
+  // Build date range: today and seven days ago
+  const toDate = new Date().toISOString().split('T')[0];
+  const fromDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+
+  const url = `https://finnhub.io/api/v1/company-news?symbol=${encodeURIComponent(
+    ticker
+  )}&from=${fromDate}&to=${toDate}&token=${FINNHUB_KEY}`;
 
   try {
-    const response = await fetch(url);
-    const data = (await response.json()) as ProxyNewsResponse;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Finnhub news failed: ${res.status}`);
+    const data: Array<{
+      id: number;
+      source: string;
+      headline: string;
+      summary: string;
+      url: string;
+      datetime: number;
+      image: string;
+    }> = await res.json();
 
-    if (data.status !== 'ok') {
-      throw new Error(data.message || 'Failed to fetch news articles.');
-    }
-
-    return data.articles.map((item, idx) => ({
-      id: `newsapi-${idx}`,
-      source: item.source.name,
-      headline: item.title,
-      description: item.description || '',
+    return data.map(item => ({
+      id: `finnhub-${item.id}`,
+      source: item.source,
+      headline: item.headline,
+      description: item.summary,
       url: item.url,
-      publishedAt: item.publishedAt,
-      imageUrl: item.urlToImage || '',
+      publishedAt: new Date(item.datetime * 1000).toISOString(),
+      imageUrl: item.image,
     }));
-  } catch (err) {
-    console.error("Error fetching news via proxy:", err);
+  } catch (err: unknown) {
+    console.error('Error fetching news from Finnhub:', err);
     return [];
   }
 }
