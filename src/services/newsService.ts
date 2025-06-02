@@ -6,6 +6,12 @@ const FINNHUB_KEY = import.meta.env.VITE_FINNHUB_KEY;
 // Fetches the last 7 days of company news from Finnhub
 export async function fetchNewsArticles(ticker?: string): Promise<Article[]> {
   if (!ticker) return [];
+  
+  // Validate API key
+  if (!FINNHUB_KEY) {
+    console.error('VITE_FINNHUB_KEY is not set');
+    return [];
+  }
 
   // Build date range: today and seven days ago
   const toDate = new Date().toISOString().split('T')[0];
@@ -18,8 +24,13 @@ export async function fetchNewsArticles(ticker?: string): Promise<Article[]> {
   )}&from=${fromDate}&to=${toDate}&token=${FINNHUB_KEY}`;
 
   try {
+    console.log(`Fetching news for ${ticker} from Finnhub...`);
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Finnhub news failed: ${res.status}`);
+    
+    if (!res.ok) {
+      throw new Error(`Finnhub API error: ${res.status} ${res.statusText}`);
+    }
+    
     const data: Array<{
       id: number;
       source: string;
@@ -29,6 +40,8 @@ export async function fetchNewsArticles(ticker?: string): Promise<Article[]> {
       datetime: number;
       image: string;
     }> = await res.json();
+
+    console.log(`Found ${data.length} articles for ${ticker}`);
 
     return data.map(item => ({
       id: `finnhub-${item.id}`,
